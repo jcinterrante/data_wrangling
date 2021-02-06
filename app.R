@@ -8,38 +8,49 @@ library(plotly)
 
 ui <- fluidPage(
   fluidRow(
-    column(width = 3)
+    tags$h1("Chicago Urban Neglect Explorer"),
+    tags$hr()
   ),
   fluidRow(
     column(width = 6,
-           plotlyOutput("service_request")
+      plotlyOutput("services")
     ),
     column(width = 6,
-           plotlyOutput("building_violation")
+      plotlyOutput("violations")
     )
   )
+)
   
   
+server<-function(input, output){
+  departments = c("CDOT - Department of Transportation")
+  timezone = "America/Chicago"
+  unit = "days"
+  date_range = c(ymd("2020,1,1"), ymd("2021,1,1"))
   
-  output$services <- renderPlot({
-    ggplot() +
-      geom_sf(data = chicago_shape_data, aes(fill = request_wait_mean)) + 
+  services <- read_csv(".\\Chicago Data\\service_subset.csv")
+  violations <- read_csv(".\\Chicago Data\\violations_subset.csv")
+  chicago_neglect <- st_read(".\\Chicago Maps\\chicago neglect.shp")
+  
+  output$services <- renderPlotly({
+    plt_1 <- ggplot() +
+      geom_sf(data = chicago_neglect, aes(fill = rqst_w_)) + 
       theme_void()+
       scale_fill_viridis_c(option = "inferno") +
       labs(title = "Duration of Outstanding Service Request",
            fill = paste0("Wait time (", unit, ")"))
+    ggplotly(plt_1)
   })
-  ggsave("Service_Requests.png")
   
-  
-  ggplot() +
-    geom_sf(data = chicago_shape_data, aes(fill = violation_wait_mean)) + 
-    theme_void()+
-    scale_fill_viridis_c(option = "inferno") +
-    labs(title = "Duration of Outstanding Building Violation", 
-         fill = paste0("Wait time (", unit, ")"))
-  ggsave("Building_Violations.png")
-  }
+  output$violations <- renderPlotly({
+    plt_2 <- ggplot() +
+      geom_sf(data = chicago_neglect, aes(fill = vltn_w_)) + 
+      theme_void()+
+      scale_fill_viridis_c(option = "inferno") +
+      labs(title = "Duration of Outstanding Building Violation", 
+           fill = paste0("Wait time (", unit, ")"))
+    ggplotly(plt_2)
+  })
+}
 
 shinyApp(ui = ui, server = server)
-  server <- function(input, output){
