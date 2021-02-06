@@ -45,9 +45,10 @@ if (!exists("chicago_shape")){
 
 departments = c("CDOT - Department of Transportation")
 timezone = "America/Chicago"
+unit = "days"
 
 service_requests_cdot <- initialize_service_requests(service_requests, departments)
-building_violations <- initialize_building_violations(building_violations_data)
+building_violations <- initialize_building_violations(building_violations_data, unit = unit)
 
 service_requests_cdot_summary <- service_requests_cdot %>%
   group_by(COMMUNITY_AREA) %>%
@@ -72,13 +73,19 @@ chicago_shape_data <- chicago_shape %>%
   left_join(service_requests_cdot_summary, by = c("area_num_1" = "COMMUNITY_AREA"))%>%
   left_join(building_violation_means, by = c("area_num_1" ))
 
-ph_basemap <- get_map(location=c(lon = 87.6298, lat = 41.8781), zoom=11, maptype = "terrain")
 
 ggplot() +
   geom_sf(data = chicago_shape_data, aes(fill = request_wait_mean)) + 
-  theme_minimal()+
-  ggmap(ph_basemap)
+  theme_void()+
+  scale_fill_viridis_c(option = "inferno") +
+  labs(title = "Duration of Outstanding Service Request",
+       fill = paste0("Wait time (", unit, ")"))
 
 ggplot() +
   geom_sf(data = chicago_shape_data, aes(fill = violation_wait_mean)) + 
-  theme_minimal()
+  theme_void()+
+  scale_fill_viridis_c(option = "inferno") +
+  labs(title = "Duration of Outstanding Building Violation", 
+       fill = paste0("Wait time (", unit, ")"))
+
+       
