@@ -2,8 +2,9 @@ library(tidyverse)
 library(sf)
 library(spData)
 library(scales)
-library(ggmap)
 library(lubridate)
+library(shiny)
+library(plotly)
 
 # Public wellbeing in cities rely on a combination of civic services and 
 # private stewardship. My choropleth answers the question: What parts of Chicago
@@ -43,49 +44,66 @@ if (!exists("chicago_shape")){
   building_violations_data <- read.csv(paste0(path, "Building_Violations.csv"))
 }
 
-departments = c("CDOT - Department of Transportation")
-timezone = "America/Chicago"
-unit = "days"
 
-service_requests_cdot <- initialize_service_requests(service_requests, departments)
-building_violations <- initialize_building_violations(building_violations_data, unit = unit)
+ui <- fluidPage(
+  fluidRow(
+    column(width = 3)
+  ),
+  fluidRow(
+    column(width = 6,
+           plotlyOutput("service_request")
+    ),
+    column(width = 6,
+           plotlyOutput("building_violation")
+  )
+)
 
-service_requests_cdot_summary <- service_requests_cdot %>%
-  group_by(COMMUNITY_AREA) %>%
-  summarize(request_wait_mean = mean(wait_time, na.rm=TRUE))
-
-#https://spatialanalysis.github.io/lab_tutorials/1_R_Spatial_Data_Handling.html
-building_violations_points <- st_as_sf(building_violations, 
-                                      coords = c("LONGITUDE", "LATITUDE"), 
-                                      crs = 4326, agr = "constant")
-
-chicago_shape <- st_transform(chicago_shape, 32616)
-building_violations_points <-st_transform(building_violations_points, 32616)
-
-building_violations_comm_points <- st_join(building_violations_points, chicago_shape["area_num_1"])
-
-st_geometry(building_violations_comm_points) <- NULL
-building_violation_means <- building_violations_comm_points %>%
-                              group_by(area_num_1) %>%
-                              summarize(violation_wait_mean = mean(wait_time))
-            
-chicago_shape_data <- chicago_shape %>%
-  left_join(service_requests_cdot_summary, by = c("area_num_1" = "COMMUNITY_AREA"))%>%
-  left_join(building_violation_means, by = c("area_num_1" ))
-
-
-ggplot() +
-  geom_sf(data = chicago_shape_data, aes(fill = request_wait_mean)) + 
-  theme_void()+
-  scale_fill_viridis_c(option = "inferno") +
-  labs(title = "Duration of Outstanding Service Request",
-       fill = paste0("Wait time (", unit, ")"))
-
-ggplot() +
-  geom_sf(data = chicago_shape_data, aes(fill = violation_wait_mean)) + 
-  theme_void()+
-  scale_fill_viridis_c(option = "inferno") +
-  labs(title = "Duration of Outstanding Building Violation", 
-       fill = paste0("Wait time (", unit, ")"))
-
-       
+server <- function(input, output){
+  departments = c("CDOT - Department of Transportation")
+  timezone = "America/Chicago"
+  unit = "days"
+  
+  service_requests_cdot <- initialize_service_requests(service_requests, departments)
+  building_violations <- initialize_building_violations(building_violations_data, unit = unit)
+  
+  service_requests_cdot_summary <- service_requests_cdot %>%
+    group_by(COMMUNITY_AREA) %>%
+    summarize(request_wait_mean = mean(wait_time, na.rm=TRUE))
+  
+  #https://spatialanalysis.github.io/lab_tutorials/1_R_Spatial_Data_Handling.html
+  building_violations_points <- st_as_sf(building_violations, 
+                                         coords = c("LONGITUDE", "LATITUDE"), 
+                                         crs = 4326, agr = "constant")
+  
+  chicago_shape <- st_transform(chicago_shape, 32616)
+  building_violations_points <-st_transform(building_violations_points, 32616)
+  
+  building_violations_comm_points <- st_join(building_violations_points, chicago_shape["area_num_1"])
+  
+  st_geometry(building_violations_comm_points) <- NULL
+  building_violation_means <- building_violations_comm_points %>%
+    group_by(area_num_1) %>%
+    summarize(violation_wait_mean = mean(wait_time))
+  
+  chicago_shape_data <- chicago_shape %>%
+    left_join(service_requests_cdot_summary, by = c("area_num_1" = "COMMUNITY_AREA"))%>%
+    left_join(building_violation_means, by = c("area_num_1" ))
+  
+  
+  ggplot() +
+    geom_sf(data = chicago_shape_data, aes(fill = request_wait_mean)) + 
+    theme_void()+
+    scale_fill_viridis_c(option = "inferno") +
+    labs(title = "Duration of Outstanding Service Request",
+         fill = paste0("Wait time (", unit, ")"))
+  ggsave("Service_Requests.png")
+  
+  
+  ggplot() +
+    geom_sf(data = chicago_shape_data, aes(fill = violation_wait_mean)) + 
+    theme_void()+
+    scale_fill_viridis_c(option = "inferno") +
+    labs(title = "Duration of Outstanding Building Violation", 
+         fill = paste0("Wait time (", unit, ")"))
+  ggsave("Building_Violations.png")
+}
