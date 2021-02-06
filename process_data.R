@@ -108,3 +108,17 @@ chicago_neglect <- chicago_shape %>%
   left_join(building_violation_means, by = c("area_num_1" ))
 
 st_write(chicago_neglect, ".\\Chicago Maps\\chicago neglect.shp", delete_layer = TRUE)
+
+ggplot() +
+  geom_sf(data = chicago_neglect, aes(fill = rqst_w_)) + 
+  theme_void()+
+  scale_fill_viridis_c(option = "inferno") +
+  labs(title = "Duration of Outstanding Service Request",
+       fill = paste0("Wait time (", unit, ")"))
+
+ggplot() +
+  geom_sf(data = chicago_neglect, aes(fill = vltn_w_)) + 
+  theme_void()+
+  scale_fill_viridis_c(option = "inferno") +
+  labs(title = "Duration of Outstanding Building Violation", 
+       fill = paste0("Wait time (", unit, ")"))
