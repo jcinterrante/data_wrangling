@@ -1,0 +1,10 @@
+name: urban_neglect_shiny_app
+title:
+username:
+account: jcinterrante
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3601336
+bundleId: 4196638
+url: https://jcinterrante.shinyapps.io/urban_neglect_shiny_app/
+when: 1612801868.89591
