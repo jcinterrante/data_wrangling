@@ -16,6 +16,7 @@ Effort to improve the appearnce of your plots relative to the default will be re
 
 Save this code as "question_2.R", and include your downloads from the Data Portal in your repo.  Save your choropleths as .png files and commit them as well.
 
+
 __Question 3 (40%):__ Using what you created for question 2, convert it into a Shiny app.  Allow at least two elements to be controlled in the UI (e.g. time, and type of data).  Then add the option to toggle streets on and off in your choropleth, using the [Major Streets shapefile](https://data.cityofchicago.org/Transportation/Major-Streets/ueqs-5wr6).  
 
 Save this code as "app.R", and include the Major Streets shapefile in your repo.
