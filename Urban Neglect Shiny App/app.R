@@ -1,3 +1,12 @@
+# Lines in your server that read a .csv or .shp throw an error because path to the file 
+# is not specified (-3)
+
+# Incorrect url (-2)
+# It takes me to a log in page instead of to your app
+
+# Great job with plot interactivity, nice work overall!
+# 92/100
+
 library(tidyverse)
 library(sf)
 library(spData)
@@ -97,15 +106,15 @@ ui <- fluidPage(
 server <- function(input, output) {
   timezone <- "America/Chicago"
   unit <- "days"
-  services_data <- read_csv("service_subset.csv") # %>%
+  services_data <- read_csv("./Urban Neglect Shiny App/service_subset.csv") # %>%
   # mutate(CREATED_DATE = mdy_hms(CREATED_DATE, tz = timezone),
   #      LAST_MODIFIED_DATE = mdy_hms(LAST_MODIFIED_DATE, tz = timezone))
-  violations_data <- read_csv("violations_subset.csv") # %>%
+  violations_data <- read_csv("./Urban Neglect Shiny App/violations_subset.csv") # %>%
   # mutate(VIOLATION.DATE = mdy(VIOLATION.DATE, tz = timezone),
   # VIOLATION.LAST.MODIFIED.DATE = mdy(VIOLATION.LAST.MODIFIED.DATE, tz = timezone))
-  chicago_neglect_data <- st_read("chicago neglect.shp") %>%
+  chicago_neglect_data <- st_read("./Urban Neglect Shiny App/chicago neglect.shp") %>%
     mutate(area_num_1 = as.numeric(are_nmb))
-  street_map <- st_read("Major_Streets.shp")
+  street_map <- st_read("./Urban Neglect Shiny App/Major_Streets.shp")
 
   date_range <- reactive({
     interval(ymd(input$dates[1]), ymd(input$dates[2]), tzone = timezone)

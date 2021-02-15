@@ -1,3 +1,10 @@
+# 1 late token used
+
+# Nice job setting a relative file path
+
+# Lines 127-129 throw an error because the variable names in the by() statement are incorrect
+# -3
+
 library(tidyverse)
 library(sf)
 library(spData)
@@ -89,12 +96,12 @@ date_range <- c(ymd("2020,1,1"), ymd("2021,1,1"))
 write_csvs <- FALSE
 
 if (!exists("chicago_shape")) {
-  path <- ".\\Chicago Maps\\"
+  path <- "./Chicago Maps/"
   chicago_shape <- st_read(paste0(path, "CommAreas.shp")) %>%
     mutate(area_num_1 = as.numeric(area_num_1))
 }
 
-path <- ".\\Chicago Data\\"
+path <- "./Chicago Data/"
 if (write_csvs) {
   service_requests_data <- read.csv(paste0(path, "311_Service_requests.csv"))
   service_requests <- initialize_service_requests(service_requests_data, departments, date_range = date_range)
@@ -118,8 +125,8 @@ building_violation_means <- building_violations %>%
   summarize(violation_wait_mean = mean(wait_time))
 
 chicago_neglect <- chicago_shape %>%
-  left_join(service_requests_summary, by = c("area_num_1" = "COMMUNITY_AREA")) %>%
-  left_join(building_violation_means, by = c("area_num_1"))
+  left_join(service_requests_summary, by = c("ar_nm_1" = "COMMUNITY_AREA")) %>%
+  left_join(building_violation_means, by = c("ar_nm_1" = "area_num_1"))
 
 st_write(chicago_neglect, ".\\Chicago Maps\\chicago neglect.shp", delete_layer = TRUE)
 
